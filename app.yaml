@@ -2,10 +2,10 @@ runtime: go113
 
 # Update with Redis instance details
 env_variables:
-  REDISHOST: '10.49.212.99'
+  REDISHOST: '10.166.68.59'
   REDISPORT: '6379'
 
 # Update with Serverless VPC Access connector details
 vpc_access_connector:
-  name: 'projects/sinmetal-lab-us/locations/us-central1/connectors/test1'
+  name: 'projects/sinmetal-lab/locations/asia-northeast1/connectors/test1'
 # [END memorystore_go_app_yaml_standard]
