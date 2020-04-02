@@ -36,6 +36,8 @@ func main() {
 		http.Handle("/increment", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(incrementHandler) }(), "/gp"))
 	}
 
+	http.Handle("/task/add", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(addTaskHandler) }(), "/gp"))
+	http.Handle("/task/process", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(processTaskHandler) }(), "/gp"))
 	http.Handle("/admin/hello", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(adminHandler) }(), "/gp"))
 
 	port := os.Getenv("PORT")
