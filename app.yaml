@@ -1,5 +1,7 @@
 runtime: go113
 
+service: admin
+
 # Update with Redis instance details
 env_variables:
   REDISHOST: '10.166.68.59'
