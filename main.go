@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -32,16 +31,11 @@ func main() {
 		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	}
 
-	redisHost := os.Getenv("REDISHOST")
-	redisPort := os.Getenv("REDISPORT")
-	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+	// redisが存在する時だけ動かす
+	if setupRedis() {
+		http.Handle("/increment", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(incrementHandler) }(), "/gp"))
+	}
 
-	const maxConnections = 10
-	redisPool = redis.NewPool(func() (redis.Conn, error) {
-		return redis.Dial("tcp", redisAddr)
-	}, maxConnections)
-
-	http.Handle("/increment", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(incrementHandler) }(), "/gp"))
 	http.Handle("/admin/hello", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(adminHandler) }(), "/gp"))
 
 	port := os.Getenv("PORT")

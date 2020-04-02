@@ -3,9 +3,28 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gomodule/redigo/redis"
 )
+
+func setupRedis() bool {
+	redisHost := os.Getenv("REDISHOST")
+	redisPort := os.Getenv("REDISPORT")
+
+	if len(redisHost) < 1 || len(redisPort) < 1 {
+		return false
+	}
+
+	redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+
+	const maxConnections = 10
+	redisPool = redis.NewPool(func() (redis.Conn, error) {
+		return redis.Dial("tcp", redisAddr)
+	}, maxConnections)
+
+	return true
+}
 
 func incrementHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
