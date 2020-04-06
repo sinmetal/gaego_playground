@@ -13,8 +13,9 @@ import (
 )
 
 type CloudTaskService struct {
-	queue string
-	tasks *cloudtasks.Service
+	queue   string
+	service string
+	tasks   *cloudtasks.Service
 }
 
 type SampleTask struct {
@@ -31,14 +32,19 @@ func NewSampleTask(ctx context.Context) (*CloudTaskService, error) {
 	if err != nil {
 		return nil, err
 	}
+	service, err := gcpmetadata.GetAppEngineService()
+	if err != nil {
+		return nil, err
+	}
 
 	s, err := cloudtasks.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return &CloudTaskService{
-		queue: fmt.Sprintf("projects/%s/locations/%s/queues/%s", pID, region, "sample"),
-		tasks: s,
+		queue:   fmt.Sprintf("projects/%s/locations/%s/queues/%s", pID, region, "sample"),
+		service: service,
+		tasks:   s,
 	}, nil
 }
 
@@ -53,10 +59,13 @@ func (s *CloudTaskService) AddTask(t *SampleTask) (*cloudtasks.Task, error) {
 		&cloudtasks.CreateTaskRequest{
 			Task: &cloudtasks.Task{
 				AppEngineHttpRequest: &cloudtasks.AppEngineHttpRequest{
-					Body:        base64.StdEncoding.EncodeToString(b),
-					Headers:     map[string]string{"Content-Type": "application/json"},
-					HttpMethod:  http.MethodPost,
+					AppEngineRouting: &cloudtasks.AppEngineRouting{
+						Service: s.service,
+					},
 					RelativeUri: "/task/process",
+					HttpMethod:  http.MethodPost,
+					Headers:     map[string]string{"Content-Type": "application/json"},
+					Body:        base64.StdEncoding.EncodeToString(b),
 				},
 			},
 		}).Do()
