@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sinmetal/gcpmetadata"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
+	"google.golang.org/appengine/v2"
 )
 
 var redisPool *redis.Pool
@@ -39,13 +39,7 @@ func main() {
 	http.Handle("/task/add", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(addTaskHandler) }(), "/gp"))
 	http.Handle("/task/process", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(processTaskHandler) }(), "/gp"))
 	http.Handle("/admin/hello", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(adminHandler) }(), "/gp"))
+	http.Handle("/", ochttp.WithRouteTag(func() http.Handler { return http.HandlerFunc(CounterHandler) }(), "/gp"))
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
+	appengine.Main()
 }
